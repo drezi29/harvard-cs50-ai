@@ -1,5 +1,6 @@
 import csv
 import sys
+import copy
 
 from util import Node, StackFrontier, QueueFrontier
 
@@ -92,8 +93,32 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    frontier = QueueFrontier()
+    initial_state = Node(source, None, None)
+    explored_set = set()
+
+    frontier.add(initial_state)
+
+    while True:
+        if frontier.empty():
+            return None
+        
+        current_node = frontier.remove()
+        explored_set.add(current_node.state)
+        
+        for movie, actor in neighbors_for_person(current_node.state):
+            if not frontier.contains_state(actor) and actor not in explored_set:
+                child_node = Node(actor, current_node, movie)
+
+                if child_node.state == target:
+                    path = []
+                    path_node = child_node
+                    while path_node.parent is not None:
+                        path.insert(0, (path_node.action, path_node.state))
+                        path_node = path_node.parent
+                    return path
+                else:
+                    frontier.add(child_node)
 
 
 def person_id_for_name(name):
