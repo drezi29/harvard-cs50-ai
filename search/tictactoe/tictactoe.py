@@ -32,7 +32,7 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    if [item for row in board for item in row].count(EMPTY) % 2 == 0:
+    if count_empty_cells(board) % 2 == 0:
         return O
     return X
 
@@ -42,10 +42,10 @@ def actions(board):
     Returns set of all possible actions (i, j) available on the board.
     """
     actions_set = set()
-    for x in range(3):
-        for y in range(3):
-            if board[x][y] == EMPTY:
-                actions_set.add((x,y))
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == EMPTY:
+                actions_set.add((i,j))
     return actions_set
 
 
@@ -53,12 +53,12 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    (x, y) = action
-    if board[x][y] != EMPTY:
-        raise Exception('Action forbidden - that cell is not empty!')
+    if action not in actions(board):
+        raise Exception("Action is not valid")
     
+    i, j = action
     board_copy = copy.deepcopy(board)
-    board_copy[x][y] = player(board_copy)
+    board_copy[i][j] = player(board_copy)
     return board_copy
 
 
@@ -80,15 +80,12 @@ def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    empty_fields = [item for row in board for item in row].count(EMPTY)
-    if empty_fields > 4:
-        return False
-    
-    if winner(board) != None or empty_fields == 0:
+    if winner(board):
         return True
-    else:
+    elif count_empty_cells(board) > 0:
         return False
-
+    else:
+        return True
 
 def utility(board):
     """
@@ -108,3 +105,7 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     """
     raise NotImplementedError
+
+
+def count_empty_cells(board):
+    return [item for row in board for item in row].count(EMPTY)
