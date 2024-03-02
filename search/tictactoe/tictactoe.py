@@ -69,7 +69,7 @@ def winner(board):
     for state in WINNING_STATES:
         values = []
         for position in state:
-            (x,y) = position
+            x, y = position
             values.append(board[x][y])
         if values.count(values[0]) == len(values) and values[0] != EMPTY:
             return values[0]
@@ -86,6 +86,7 @@ def terminal(board):
         return False
     else:
         return True
+
 
 def utility(board):
     """
@@ -104,7 +105,42 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
+    if terminal(board):
+        return None
+    elif player(board) == X:
+        moves = []
+        for action in actions(board):
+            moves.append((min_value(result(board, action)), action))
+        return sorted(moves, key= lambda x: x[0], reverse=True)[0][1]
+    else:
+        moves = []
+        for action in actions(board):
+            moves.append((max_value(result(board, action)), action))
+        return sorted(moves, key= lambda x: x[0])[0][1]
+
+
+def max_value(board):
+    if terminal(board):
+        return utility(board)
+    
+    v = -math.inf
+    for action in actions(board):
+        action_value = min_value(result(board, action))
+        v = max(v, action_value)
+        
+    return v
+
+
+def min_value(board):
+    if terminal(board):
+        return utility(board)
+    
+    v = math.inf
+    for action in actions(board):
+        action_value = max_value(result(board, action))
+        v = min(v, action_value)
+        
+    return v
 
 
 def count_empty_cells(board):
