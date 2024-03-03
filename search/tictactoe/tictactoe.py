@@ -107,39 +107,46 @@ def minimax(board):
     """
     if terminal(board):
         return None
-    elif player(board) == X:
-        moves = []
+    
+    alpha = -math.inf
+    beta = math.inf
+    moves = []
+
+    if player(board) == X:
         for action in actions(board):
-            moves.append((min_value(result(board, action)), action))
+            moves.append((min_value(result(board, action), alpha, beta), action))
         return sorted(moves, key= lambda x: x[0], reverse=True)[0][1]
     else:
-        moves = []
         for action in actions(board):
-            moves.append((max_value(result(board, action)), action))
+            moves.append((max_value(result(board, action), alpha, beta), action))
         return sorted(moves, key= lambda x: x[0])[0][1]
 
 
-def max_value(board):
+def max_value(board, alpha, beta):
     if terminal(board):
         return utility(board)
     
     v = -math.inf
     for action in actions(board):
-        action_value = min_value(result(board, action))
+        action_value = min_value(result(board, action), alpha, beta)
         v = max(v, action_value)
-        
+        alpha = max(alpha, v)
+        if beta <= alpha:
+            break
     return v
 
 
-def min_value(board):
+def min_value(board, alpha, beta):
     if terminal(board):
         return utility(board)
     
     v = math.inf
     for action in actions(board):
-        action_value = max_value(result(board, action))
+        action_value = max_value(result(board, action), alpha, beta)
         v = min(v, action_value)
-        
+        beta = min(beta, v)
+        if beta <= alpha:
+            break
     return v
 
 
