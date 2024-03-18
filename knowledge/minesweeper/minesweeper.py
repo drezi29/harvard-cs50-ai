@@ -1,6 +1,8 @@
 import itertools
 import random
 
+from utils import get_ranges
+
 
 class Minesweeper():
     """
@@ -191,7 +193,36 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        raise NotImplementedError
+        self.moves_made.add(cell)
+        self.mark_safe(cell)
+
+        neighbour_unknown_state_cells = []
+        neighbour_mines = 0
+        ranges = get_ranges(cell, self.height, self.width)
+
+        for i in ranges[0]:
+            for j in ranges[1]:
+                if (i,j) == (cell[0], cell[1]):
+                    continue
+                if (i,j) in self.mines:
+                    neighbour_mines += 1 
+                if (i,j) not in self.safes and (i,j) not in self.mines:
+                    neighbour_unknown_state_cells.append((i,j))
+        
+        cell_sentence = Sentence(neighbour_unknown_state_cells, count - neighbour_mines)
+        self.knowledge.append(cell_sentence)
+
+        for sentence in self.knowledge:
+            for cell in sentence.known_mines().copy():
+                self.mark_mine(cell)
+            for cell in sentence.known_safes().copy():
+                self.mark_safe(cell)
+
+        for sentence in self.knowledge:
+            if cell_sentence.cells.issubset(sentence.cells) and sentence.count > 0 and cell_sentence.count > 0 and cell_sentence != sentence:
+                subset = sentence.cells.difference(cell_sentence.cells)
+                cell_sentence_subset = Sentence(list(subset), sentence.count - cell_sentence.count)
+                self.knowledge.append(cell_sentence_subset) 
 
     def make_safe_move(self):
         """
